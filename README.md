@@ -1,6 +1,6 @@
 # native-ocr
 
-Text recognition with the OCR engine built into the operating system, so your app doesn't ship a model or a native library of its own.
+Text recognition with the OCR engine built into the operating system, so your app doesn't need to ship an OCR model or native library of its own.
 
 | Platform | Engine | Languages |
 |---|---|---|
