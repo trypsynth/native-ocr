@@ -18,6 +18,10 @@ use windows::{
 
 use crate::{Error, Result};
 
+pub const fn is_available() -> bool {
+	true
+}
+
 /// What the engine reports, or the documented 2600 pixels if it can't be read.
 pub fn max_image_dimension() -> u32 {
 	OcrEngine::MaxImageDimension().unwrap_or(2600)

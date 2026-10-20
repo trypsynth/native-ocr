@@ -13,6 +13,10 @@ use objc2_vision::{VNImageRequestHandler, VNRecognizeTextRequest, VNRequest, VNR
 
 use crate::{Error, Result};
 
+pub const fn is_available() -> bool {
+	true
+}
+
 /// About a 300 DPI letter page. Vision documents no limit, and larger pages only cost memory.
 pub const fn max_image_dimension() -> u32 {
 	4000

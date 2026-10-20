@@ -2,11 +2,14 @@
 
 Text recognition with the OCR engine built into the operating system, so your app doesn't need to ship an OCR model or native library of its own.
 
+Linux has no engine built in, so there it uses Tesseract from the user's package manager, such as `tesseract-ocr` and `tesseract-ocr-eng`. It's loaded when first used rather than linked, so your binary builds and runs without it, and recognizing returns `Error::NotInstalled` until it's installed. Set `TESSDATA_PREFIX` to use language data from somewhere other than the distro's usual directory.
+
 | Platform | Engine | Languages |
 |---|---|---|
 | Windows 10 and 11 | `Windows.Media.Ocr` | The OCR language packs installed for the user's languages |
 | macOS | Vision, at its accurate recognition level | Built into the OS |
-| Everywhere else | None yet | |
+| Linux | Tesseract 4 or 5, loaded at run time from the system's `libtesseract` | The Tesseract language data the user installed, matched to their locale, plus English |
+| Everywhere else | None | |
 
 ## Usage
 
@@ -16,6 +19,7 @@ use native_ocr::{Error, recognize_rgba};
 match recognize_rgba(&pixels, width, height) {
 	Ok(text) => println!("{text}"),
 	Err(Error::NoLanguage) => println!("Install an OCR language pack in Windows' language settings."),
+	Err(Error::NotInstalled) => println!("Install Tesseract from your package manager."),
 	Err(err) => println!("{err}"),
 }
 ```

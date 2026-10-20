@@ -10,8 +10,8 @@ fn reads_the_sample() {
 			assert!(text.contains("quick brown fox"), "{text}");
 			assert!(text.contains("windows 10, 2026"), "{text}");
 		}
-		// CI machines may have an engine but no language to run it with.
-		Err(Error::NoLanguage) => {}
+		// CI machines may have no Tesseract, or an engine but no language to run it with.
+		Err(Error::NoLanguage | Error::NotInstalled) => {}
 		Err(Error::Unavailable) => assert!(!is_available()),
 		Err(err) => panic!("{err}"),
 	}

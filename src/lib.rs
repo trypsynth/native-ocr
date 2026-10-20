@@ -3,24 +3,29 @@
 //! - Windows: `Windows.Media.Ocr`, using the OCR language packs installed for the user's
 //!   languages.
 //! - macOS: Vision's accurate text recognition, whose languages ship with the OS.
-//! - Elsewhere: no engine yet, so [`is_available`] is `false` and recognizing returns
+//! - Linux: Tesseract, loaded at run time from the system's `libtesseract`, with the language data
+//!   the user installed. Without the library, recognizing returns [`Error::NotInstalled`].
+//! - Elsewhere: no engine, so [`is_available`] is `false` and recognizing returns
 //!   [`Error::Unavailable`].
 //!
 //! Recognition blocks, so call it from a worker thread in a GUI app.
 
 #[cfg_attr(target_os = "macos", path = "engine/macos.rs")]
 #[cfg_attr(windows, path = "engine/windows.rs")]
-#[cfg_attr(not(any(windows, target_os = "macos")), path = "engine/unavailable.rs")]
+#[cfg_attr(target_os = "linux", path = "engine/linux.rs")]
+#[cfg_attr(not(any(windows, target_os = "macos", target_os = "linux")), path = "engine/unavailable.rs")]
 mod engine;
 mod error;
 
 pub use error::{Error, Result};
 
-/// Whether this platform has an OCR engine. A `true` here can still fail with
-/// [`Error::NoLanguage`] on Windows.
+/// Whether this system has an OCR engine. A `true` here can still fail with
+/// [`Error::NoLanguage`] on Windows and Linux. On Linux this loads Tesseract the first time it's
+/// called.
 #[must_use]
-pub const fn is_available() -> bool {
-	cfg!(any(windows, target_os = "macos"))
+#[allow(clippy::missing_const_for_fn, reason = "Linux looks for Tesseract at run time")]
+pub fn is_available() -> bool {
+	engine::is_available()
 }
 
 /// The largest image side the engine works with, or 0 without an engine. Engines downscale
@@ -39,8 +44,9 @@ pub fn max_image_dimension() -> u32 {
 /// # Errors
 ///
 /// [`Error::InvalidImage`] when the byte count doesn't match the size, [`Error::Unavailable`]
-/// without an engine, [`Error::NoLanguage`] when Windows has no OCR language pack for the user's
-/// languages, and [`Error::Failed`] when the engine fails.
+/// without an engine, [`Error::NotInstalled`] when Linux doesn't have Tesseract,
+/// [`Error::NoLanguage`] when Windows has no OCR language pack for the user's languages or Linux
+/// has no Tesseract language data, and [`Error::Failed`] when the engine fails.
 pub fn recognize_rgba(rgba: &[u8], width: u32, height: u32) -> Result<String> {
 	let expected = (width as usize) * (height as usize) * 4;
 	if width == 0 || height == 0 || rgba.len() != expected {

@@ -9,6 +9,8 @@ pub enum Error {
 	NoLanguage,
 	/// There's no OCR engine on this platform.
 	Unavailable,
+	/// The platform's engine is a separate install that's missing: Tesseract on Linux.
+	NotInstalled,
 	/// The image isn't a valid RGBA8 bitmap of the size given.
 	InvalidImage(String),
 	/// The engine refused the image, or failed while recognizing it.
@@ -20,6 +22,7 @@ impl fmt::Display for Error {
 		match self {
 			Self::NoLanguage => write!(f, "no OCR language is installed"),
 			Self::Unavailable => write!(f, "there is no OCR engine on this platform"),
+			Self::NotInstalled => write!(f, "the OCR engine (Tesseract) is not installed"),
 			Self::InvalidImage(detail) => write!(f, "invalid image: {detail}"),
 			Self::Failed(detail) => write!(f, "OCR failed: {detail}"),
 		}
